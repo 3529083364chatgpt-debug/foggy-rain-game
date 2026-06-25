@@ -165,18 +165,24 @@ body {
 .character-sprite {
     position: absolute;
     bottom: 0;
-    max-height: 100%;
-    max-width: 40%;
+    height: 100%;
+    max-width: 35%;
     transition: all 0.5s ease;
-    filter: drop-shadow(0 0 20px rgba(0,0,0,0.8));
+    filter: drop-shadow(0 0 30px rgba(0,0,0,0.9));
+}
+
+.character-sprite img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
 }
 
 .character-left {
-    left: 10%;
+    left: 5%;
 }
 
 .character-right {
-    right: 10%;
+    right: 5%;
 }
 
 .character-center {
@@ -184,7 +190,7 @@ body {
     transform: translateX(-50%);
 }
 
-/* 角色占位符（用CSS绘制的简约立绘） */
+/* 角色占位符（后备样式） */
 .character-placeholder {
     width: 200px;
     height: 350px;
@@ -587,9 +593,12 @@ body {
 /* 结局界面 */
 #endingScreen {
     background: #0d1117;
-    display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#endingScreen.active {
+    display: flex;
 }
 
 .ending-content {
