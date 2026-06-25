@@ -256,6 +256,21 @@ const scenes = {
         ]
     },
     
+    villa_investigate: {
+        background: 'villa_entrance',
+        bgColor: '#1a2a1a',
+        character: { name: '老周', position: 'left', color: '#3d3d29' },
+        dialogs: [
+            { speaker: '', text: '你回到了别墅客厅。', effect: '' }
+        ],
+        choices: [
+            { text: '去书房调查', nextScene: 'study_room_investigate' },
+            { text: '找林若曦谈谈', nextScene: 'find_linruoxi' },
+            { text: '在客厅四处看看', nextScene: 'look_around_living' },
+            { text: '结束调查，开始推理', nextScene: 'deduction_1' }
+        ]
+    },
+    
     study_room: {
         background: 'study_room',
         bgColor: '#2a1f14',
@@ -271,7 +286,21 @@ const scenes = {
             { text: '检查书桌', nextScene: 'check_desk' },
             { text: '检查窗户', nextScene: 'check_window' },
             { text: '检查书架', nextScene: 'check_bookshelf' },
-            { text: '离开书房', nextScene: 'meet_housekeeper' }
+            { text: '离开书房', nextScene: 'villa_investigate' }
+        ]
+    },
+    
+    study_room_investigate: {
+        background: 'study_room',
+        bgColor: '#2a1f14',
+        dialogs: [
+            { speaker: '', text: '你继续在书房里搜查。', effect: '' }
+        ],
+        choices: [
+            { text: '检查书桌', nextScene: 'check_desk' },
+            { text: '检查窗户', nextScene: 'check_window' },
+            { text: '检查书架', nextScene: 'check_bookshelf' },
+            { text: '离开书房', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -289,8 +318,8 @@ const scenes = {
         ],
         onEnter: function() { addClue('sleeping_pills'); },
         choices: [
-            { text: '继续检查其他地方', nextScene: 'study_room' },
-            { text: '离开书房', nextScene: 'meet_housekeeper' }
+            { text: '继续检查其他地方', nextScene: 'study_room_investigate' },
+            { text: '离开书房', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -309,8 +338,8 @@ const scenes = {
         ],
         onEnter: function() { addClue('window_scratch'); },
         choices: [
-            { text: '继续检查其他地方', nextScene: 'study_room' },
-            { text: '离开书房', nextScene: 'meet_housekeeper' }
+            { text: '继续检查其他地方', nextScene: 'study_room_investigate' },
+            { text: '离开书房', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -329,8 +358,8 @@ const scenes = {
         ],
         onEnter: function() { addClue('misplaced_book'); },
         choices: [
-            { text: '继续检查其他地方', nextScene: 'study_room' },
-            { text: '离开书房', nextScene: 'meet_housekeeper' }
+            { text: '继续检查其他地方', nextScene: 'study_room_investigate' },
+            { text: '离开书房', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -373,7 +402,7 @@ const scenes = {
         choices: [
             { text: '继续追问', nextScene: 'linruoxi_press' },
             { text: '换个话题', nextScene: 'find_linruoxi' },
-            { text: '结束对话', nextScene: 'meet_housekeeper' }
+            { text: '结束对话', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -394,7 +423,7 @@ const scenes = {
         ],
         onEnter: function() { changeFavorability('linruoxi', -15); },
         choices: [
-            { text: '回到大厅', nextScene: 'meet_housekeeper' }
+            { text: '回到大厅', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -417,7 +446,7 @@ const scenes = {
         onEnter: function() { changeFavorability('linruoxi', -5); },
         choices: [
             { text: '继续聊', nextScene: 'find_linruoxi' },
-            { text: '结束对话', nextScene: 'meet_housekeeper' }
+            { text: '结束对话', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -441,7 +470,7 @@ const scenes = {
         choices: [
             { text: '继续聊建筑', nextScene: 'linruoxi_architecture_more' },
             { text: '还是聊案子吧', nextScene: 'find_linruoxi' },
-            { text: '结束对话', nextScene: 'meet_housekeeper' }
+            { text: '结束对话', nextScene: 'villa_investigate' }
         ]
     },
     
@@ -1633,6 +1662,18 @@ function updateBackground(scene) {
     bgElement.style.position = 'relative';
 }
 
+// 角色立绘图片映射
+const characterImages = {
+    '赵律师': 'zhao_lawyer.png',
+    '老周': 'lao_zhou.png',
+    '林若曦': 'lin_ruoxi.png',
+    '王秘书': 'wang_secretary.png',
+    '李医生': 'li_doctor.png',
+    '老邻居': 'old_neighbor.png',
+    '周明': 'zhou_ming.png',
+    '张警官': 'zhang_police.png'
+};
+
 function updateCharacter(scene) {
     const charLayer = document.getElementById('characterLayer');
     charLayer.innerHTML = '';
@@ -1642,12 +1683,18 @@ function updateCharacter(scene) {
         const charDiv = document.createElement('div');
         charDiv.className = `character-sprite character-${char.position || 'center'}`;
         
-        // 创建简约的角色占位符
-        charDiv.innerHTML = `
-            <div class="character-placeholder" style="background: linear-gradient(180deg, ${char.color || '#2a2a3a'}88 0%, ${char.color || '#2a2a3a'}cc 100%);">
-                <div class="char-name">${char.name}</div>
-            </div>
-        `;
+        const imageFile = characterImages[char.name];
+        if (imageFile) {
+            // 使用真正的立绘图片
+            charDiv.innerHTML = `<img src="images/${imageFile}" alt="${char.name}">`;
+        } else {
+            // 后备：使用简约占位符
+            charDiv.innerHTML = `
+                <div class="character-placeholder" style="background: linear-gradient(180deg, ${char.color || '#2a2a3a'}88 0%, ${char.color || '#2a2a3a'}cc 100%);">
+                    <div class="char-name">${char.name}</div>
+                </div>
+            `;
+        }
         
         charLayer.appendChild(charDiv);
     }
