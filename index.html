@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雾都雨夜 - 文字冒险</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 雨滴画布 -->
+    <canvas id="rainCanvas"></canvas>
+
+    <!-- 标题界面 -->
+    <div id="titleScreen" class="screen active">
+        <div class="title-content">
+            <h1 class="game-title">雾都雨夜</h1>
+            <p class="subtitle">一场关于真相与谎言的悬疑冒险</p>
+            <div class="title-buttons">
+                <button class="btn btn-primary" onclick="startNewGame()">开始游戏</button>
+                <button class="btn" onclick="openLoadScreen()">继续游戏</button>
+                <button class="btn" onclick="openSettings()">设置</button>
+                <button class="btn" onclick="showAbout()">关于</button>
+            </div>
+        </div>
+        <div class="rain-overlay"></div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="gameScreen" class="screen">
+        <!-- 背景层 -->
+        <div id="background" class="background"></div>
+        
+        <!-- 立绘层 -->
+        <div id="characterLayer" class="character-layer"></div>
+        
+        <!-- 顶部状态栏 -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-label">生命</span>
+                <div class="status-bar-bg">
+                    <div id="hpBar" class="status-fill hp-fill"></div>
+                </div>
+                <span id="hpText" class="status-value">100</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">理智</span>
+                <div class="status-bar-bg">
+                    <div id="sanBar" class="status-fill san-fill"></div>
+                </div>
+                <span id="sanText" class="status-value">100</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">线索</span>
+                <span id="clueCount" class="status-value">0</span>
+            </div>
+        </div>
+
+        <!-- 对话框 -->
+        <div id="dialogBox" class="dialog-box">
+            <div id="speakerName" class="speaker-name"></div>
+            <div id="dialogText" class="dialog-text"></div>
+            <div class="dialog-indicator">▼</div>
+        </div>
+
+        <!-- 选项区 -->
+        <div id="choicesContainer" class="choices-container"></div>
+
+        <!-- 底部菜单 -->
+        <div class="bottom-menu">
+            <button class="menu-btn" onclick="openClueBook()">📋 线索簿</button>
+            <button class="menu-btn" onclick="openSaveScreen()">💾 存档</button>
+            <button class="menu-btn" onclick="openLoadScreen()">📂 读档</button>
+            <button class="menu-btn" onclick="openSettings()">⚙️ 设置</button>
+            <button class="menu-btn" onclick="backToTitle()">🏠 标题</button>
+        </div>
+    </div>
+
+    <!-- 线索簿界面 -->
+    <div id="clueBookScreen" class="screen modal-screen">
+        <div class="modal-content">
+            <h2>线索簿</h2>
+            <div class="clue-tabs">
+                <button class="tab-btn active" onclick="switchClueTab('physical', this)">物证</button>
+                <button class="tab-btn" onclick="switchClueTab('testimony', this)">证言</button>
+                <button class="tab-btn" onclick="switchClueTab('document', this)">档案</button>
+            </div>
+            <div id="clueList" class="clue-list"></div>
+            <button class="btn btn-close" onclick="closeClueBook()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 存档界面 -->
+    <div id="saveScreen" class="screen modal-screen">
+        <div class="modal-content">
+            <h2 id="saveTitle">存档</h2>
+            <div id="saveSlots" class="save-slots"></div>
+            <button class="btn btn-close" onclick="closeSaveScreen()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 设置界面 -->
+    <div id="settingsScreen" class="screen modal-screen">
+        <div class="modal-content">
+            <h2>设置</h2>
+            <div class="settings-group">
+                <label>文字速度</label>
+                <input type="range" id="textSpeed" min="10" max="100" value="50">
+            </div>
+            <div class="settings-group">
+                <label>音量</label>
+                <input type="range" id="volume" min="0" max="100" value="70">
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="autoPlay" checked> 自动播放（已读文本）
+                </label>
+            </div>
+            <div class="settings-group">
+                <label>
+                    <input type="checkbox" id="rainEffect" checked> 雨天效果
+                </label>
+            </div>
+            <button class="btn btn-close" onclick="closeSettings()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 关于界面 -->
+    <div id="aboutScreen" class="screen modal-screen">
+        <div class="modal-content">
+            <h2>关于</h2>
+            <p>《雾都雨夜》</p>
+            <p>一款悬疑推理文字冒险游戏</p>
+            <p>在这个阴雨连绵的城市里，每个人都有秘密...</p>
+            <p class="version">版本 1.0</p>
+            <button class="btn btn-close" onclick="closeAbout()">关闭</button>
+        </div>
+    </div>
+
+    <!-- 结局界面 -->
+    <div id="endingScreen" class="screen">
+        <div class="ending-content">
+            <h1 id="endingTitle" class="ending-title"></h1>
+            <p id="endingText" class="ending-text"></p>
+            <div class="ending-buttons">
+                <button class="btn btn-primary" onclick="startNewGame()">重新开始</button>
+                <button class="btn" onclick="backToTitle()">返回标题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推理界面 -->
+    <div id="deductionScreen" class="screen modal-screen">
+        <div class="modal-content deduction-modal">
+            <h2>推理时间</h2>
+            <p id="deductionQuestion" class="deduction-question"></p>
+            <div id="deductionOptions" class="deduction-options"></div>
+            <div id="deductionResult" class="deduction-result"></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
